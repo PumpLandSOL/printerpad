@@ -30,6 +30,19 @@
     if (!eth) return toast('No Stable-chain (EVM) wallet found — install MetaMask or Rabby');
     try {
       const a = await eth.request({ method: 'eth_requestAccounts' });
+      // pin the wallet to Stable mainnet (chainId 988 / 0x3dc); add the network if missing
+      try {
+        await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x3dc' }] });
+      } catch (sw) {
+        if (sw && (sw.code === 4902 || (sw.data && sw.data.originalError && sw.data.originalError.code === 4902))) {
+          try {
+            await eth.request({ method: 'wallet_addEthereumChain', params: [{
+              chainId: '0x3dc', chainName: 'Stable',
+              nativeCurrency: { name: 'USDT0', symbol: 'USDT0', decimals: 18 },
+              rpcUrls: ['https://rpc.stable.xyz'], blockExplorerUrls: ['https://stablescan.xyz'] }] });
+          } catch (ad) {}
+        }
+      }
       if (a && a[0] && isEvm(a[0])) { wallet = a[0]; localStorage.setItem('printerpad_w', wallet); renderWallet();
         if ($('f_payout') && !$('f_payout').value) $('f_payout').value = wallet;
         if ($('m_payout') && !$('m_payout').value) $('m_payout').value = wallet;
