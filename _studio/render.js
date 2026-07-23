@@ -11,11 +11,11 @@ const DESKTOP = 'C:/Users/efrai/OneDrive/Desktop';
 const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 
 const SIZES = {
-  'moonpad-vs': [2400, 1350],
-  'moonpad-pfp': [2000, 2000],
-  'moonpad-banner': [3000, 1000],
-  'moonpad-keyart': [2400, 1350],
-  'moonpad-features': [2400, 1350],
+  'printerpad-pfp': [2000, 2000],
+  'printerpad-banner': [3000, 1000],
+  'printerpad-first': [2400, 1350],
+  'printerpad-chain': [2400, 1350],
+  'printerpad-how': [2400, 1350],
 };
 
 const only = process.argv[2];
