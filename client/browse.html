@@ -8,14 +8,14 @@
   @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap');
   *{margin:0;padding:0;box-sizing:border-box}
   :root{
-    --bg:#040604;--deep:#000;--ink:#eefaf6;--sub:#9ab8b0;--mut:#5d7263;--line:rgba(238,250,240,.1);--line2:rgba(238,250,240,.2);
-    --card:#0a0e0a;--card2:#101610;
-    --vio:#00d6a4;--cy:#00d6a4;--pk:#7bfbe0;--amb:#7bfbe0;--grn:#00d6a4;--red:#ff5566;
-    --tech:linear-gradient(135deg,#00d6a4,#4ef08a);--meme:linear-gradient(135deg,#7bfbe0,#b2ffe9)}
+    --bg:#000000;--deep:#000;--ink:#ffffff;--sub:#a6a6a6;--mut:#6a6a6a;--line:rgba(255,255,255,.1);--line2:rgba(255,255,255,.2);
+    --card:#0a0a0a;--card2:#121212;
+    --vio:#ffffff;--cy:#ffffff;--pk:#d6d6d6;--amb:#d6d6d6;--grn:#ffffff;--red:#ff5566;
+    --tech:linear-gradient(135deg,#ffffff,#bbbbbb);--meme:linear-gradient(135deg,#d6d6d6,#f2f2f2)}
   html,body{background:var(--bg);color:var(--ink);font-family:'JetBrains Mono',ui-monospace,monospace;-webkit-font-smoothing:antialiased}
   .dither{position:fixed;z-index:-2;pointer-events:none;background-image:radial-gradient(circle,rgba(0,214,164,.55) 1px,transparent 1.4px);background-size:8px 8px;opacity:.3}
   .dither.d1{top:-4%;right:-6%;width:52vw;height:46vh;-webkit-mask-image:radial-gradient(60% 60% at 70% 30%,#000,transparent 72%);mask-image:radial-gradient(60% 60% at 70% 30%,#000,transparent 72%)}
-  .dither.d2{bottom:-8%;left:-6%;width:44vw;height:48vh;background-image:radial-gradient(circle,rgba(238,250,240,.5) 1px,transparent 1.4px);background-size:9px 9px;opacity:.18;-webkit-mask-image:radial-gradient(55% 55% at 35% 60%,#000,transparent 70%);mask-image:radial-gradient(55% 55% at 35% 60%,#000,transparent 70%)}
+  .dither.d2{bottom:-8%;left:-6%;width:44vw;height:48vh;background-image:radial-gradient(circle,rgba(255,255,255,.5) 1px,transparent 1.4px);background-size:9px 9px;opacity:.18;-webkit-mask-image:radial-gradient(55% 55% at 35% 60%,#000,transparent 70%);mask-image:radial-gradient(55% 55% at 35% 60%,#000,transparent 70%)}
   a{color:inherit;text-decoration:none}
   .wrap{max-width:1100px;margin:0 auto;padding:0 20px}
   .mono{font-family:'JetBrains Mono',ui-monospace,monospace}
@@ -78,7 +78,7 @@
 <div class="dither d1"></div><div class="dither d2"></div>
 <header><div class="hrow">
   <a class="logo" href="/">
-    <svg viewBox="0 0 24 24" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><g fill="#00d6a4"><rect x="1" y="6" width="22" height="2"/><rect x="1" y="16" width="22" height="2"/><rect x="1" y="8" width="2" height="8"/><rect x="21" y="8" width="2" height="8"/><rect x="10" y="9" width="4" height="2"/><rect x="9" y="11" width="3" height="2"/><rect x="12" y="11" width="3" height="2"/><rect x="10" y="13" width="4" height="2"/><rect x="4" y="11" width="2" height="2"/><rect x="18" y="11" width="2" height="2"/></g></svg>
+    <svg viewBox="0 0 24 24" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><g fill="#ffffff"><rect x="1" y="6" width="22" height="2"/><rect x="1" y="16" width="22" height="2"/><rect x="1" y="8" width="2" height="8"/><rect x="21" y="8" width="2" height="8"/><rect x="10" y="9" width="4" height="2"/><rect x="9" y="11" width="3" height="2"/><rect x="12" y="11" width="3" height="2"/><rect x="10" y="13" width="4" height="2"/><rect x="4" y="11" width="2" height="2"/><rect x="18" y="11" width="2" height="2"/></g></svg>
     PRINTER<b>PAD</b>
   </a>
   <div class="hnav">
@@ -115,7 +115,7 @@
   const esc = (s) => String(s == null ? '' : s).replace(/[<>&"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
   const host = (u) => { try { return new URL(u).host.replace(/^www\./, ''); } catch (e) { return u; } };
   const ago = (t) => { const s = (Date.now() - t) / 1000; if (s < 60) return 'just now'; if (s < 3600) return (s / 60 | 0) + 'm ago'; if (s < 86400) return (s / 3600 | 0) + 'h ago'; return (s / 86400 | 0) + 'd ago'; };
-  const scoreColor = (s) => s >= 80 ? '#00d6a4' : s >= 60 ? '#8fe06a' : s >= 40 ? '#ffd75e' : '#ff5566';
+  const scoreColor = (s) => s >= 80 ? '#ffffff' : s >= 60 ? '#8fe06a' : s >= 40 ? '#ffd75e' : '#ff5566';
 
   let ALL = [], q = '', kind = 'all', sort = 'new';
 
