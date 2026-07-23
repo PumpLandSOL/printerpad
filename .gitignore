@@ -1,0 +1,8 @@
+node_modules/
+projects.json
+*.log
+.DS_Store
+.env
+_*.js
+_*.mjs
+_*.html

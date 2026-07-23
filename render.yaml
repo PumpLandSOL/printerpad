@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: printerpad
+    runtime: node
+    plan: free
+    buildCommand: ""
+    startCommand: node server/index.js
+    autoDeploy: true
+    envVars:
+      - key: REWARDS_ON
+        value: "1"
+      - key: POOL_APR
+        value: "42"
+      - key: CASHBACK_RATE
+        value: "0.10"
+      # Set in the Render dashboard when ready:
+      #   PRINT_MINT        — lights up the $PRINT CA bar
+      #   CLAUDE_API_KEY   — enables the AI co-builder
+      #   GH_TOKEN         — lifts GitHub rate limits on verification
+      #   GH_WRITE_TOKEN   — lets the AI co-builder create real repos

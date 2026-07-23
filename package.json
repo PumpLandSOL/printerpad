@@ -1,0 +1,8 @@
+{
+  "name": "goodtek",
+  "version": "1.0.0",
+  "description": "GoodTek.fun — the tech launchpad on Solana ($TEK). Every coin ships a verified website + GitHub repo. Dependency-free.",
+  "main": "server/index.js",
+  "scripts": { "start": "node server/index.js" },
+  "engines": { "node": ">=18" }
+}

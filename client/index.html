@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Printer Pad — the launchpad on Stable (STBL chain)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#040604;--deep:#000;--ink:#eefaf6;--sub:#9ab8b0;--mut:#5d7263;--line:rgba(238,250,240,.1);--line2:rgba(238,250,240,.2);
+    --card:#0a0e0a;--card2:#101610;
+    --vio:#00d6a4;--cy:#00d6a4;--pk:#7bfbe0;--amb:#7bfbe0;--grn:#00d6a4;--red:#ff5566;
+    --tech:linear-gradient(135deg,#00d6a4,#4ef08a);--meme:linear-gradient(135deg,#7bfbe0,#b2ffe9);
+    --glass:none;
+    --sh:none;
+    --shup:none}
+  html,body{background:var(--bg);color:var(--ink);font-family:'JetBrains Mono',ui-monospace,monospace;-webkit-font-smoothing:antialiased}
+  /* ── halftone dither clouds (the only decoration) ── */
+  .dither{position:fixed;z-index:-2;pointer-events:none;
+    background-image:radial-gradient(circle,rgba(0,214,164,.55) 1px,transparent 1.4px);
+    background-size:8px 8px;opacity:.34}
+  .dither.d1{top:-4%;right:-6%;width:52vw;height:46vh;-webkit-mask-image:radial-gradient(60% 60% at 70% 30%,#000,transparent 72%);mask-image:radial-gradient(60% 60% at 70% 30%,#000,transparent 72%)}
+  .dither.d2{top:34%;left:-8%;width:40vw;height:52vh;background-image:radial-gradient(circle,rgba(238,250,240,.5) 1px,transparent 1.4px);background-size:9px 9px;opacity:.22;-webkit-mask-image:radial-gradient(55% 55% at 30% 50%,#000,transparent 70%);mask-image:radial-gradient(55% 55% at 30% 50%,#000,transparent 70%)}
+  .dither.d3{bottom:-8%;right:6%;width:56vw;height:50vh;background-size:7px 7px;opacity:.26;-webkit-mask-image:radial-gradient(60% 55% at 60% 70%,#000,transparent 72%);mask-image:radial-gradient(60% 55% at 60% 70%,#000,transparent 72%)}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+  .mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+  .disp{font-family:'Press Start 2P',monospace}
+  .gtx{color:var(--grn)}
+  .gtm{color:var(--amb)}
+  /* ── live launches marquee ── */
+  .mq{display:none;position:fixed;bottom:0;left:0;right:0;z-index:40;background:rgba(0,0,0,.92);backdrop-filter:blur(6px);color:var(--sub);overflow:hidden;border-top:1px solid var(--line)}
+  .mq.on{display:block}
+  .mq-in{display:inline-flex;align-items:center;gap:0;white-space:nowrap;animation:mq 32s linear infinite;padding:8px 0}
+  .mq:hover .mq-in{animation-play-state:paused}
+  @keyframes mq{to{transform:translateX(-50%)}}
+  .mq-i{display:inline-flex;align-items:center;gap:8px;font:500 12px 'JetBrains Mono',monospace;padding:0 24px;border-right:1px solid var(--line)}
+  .mq-i .tk{color:var(--grn)}.mq-i.meme .tk{color:var(--amb)}
+  .mq-i .sc{color:var(--grn)}.mq-i .kd{opacity:.5;font-size:10px;letter-spacing:.12em}
+  .mq-live{display:inline-flex;align-items:center;gap:7px;font:700 10px 'JetBrains Mono',monospace;letter-spacing:.14em;color:var(--grn);padding:0 24px}
+  .mq-live .dot{width:6px;height:6px;border-radius:50%;background:var(--grn);box-shadow:0 0 10px var(--grn);animation:pulse 1.4s infinite}
+  @keyframes pulse{50%{opacity:.3}}
+  /* ── floating pill nav ── */
+  header{position:fixed;top:14px;left:0;right:0;z-index:30;pointer-events:none}
+  .hrow{pointer-events:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;max-width:920px;margin:0 auto;padding:9px 12px 9px 18px;background:rgba(4,6,4,.86);backdrop-filter:blur(12px);border:1px solid var(--line2);border-radius:999px}
+  .logo{display:flex;align-items:center;gap:9px;font-family:'Press Start 2P',monospace;font-size:11px}
+  .logo svg{width:22px;height:22px;flex:none;image-rendering:pixelated}
+  .logo b{color:var(--grn);font-weight:400}
+  .hnav{display:flex;gap:4px;align-items:center}
+  .hlink{font:500 12.5px 'JetBrains Mono',monospace;color:var(--sub);padding:8px 11px;border-radius:999px;background:none;border:none;cursor:pointer}
+  .hlink:hover{color:var(--ink)}
+  .btn{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12.5px;border:1px solid transparent;border-radius:999px;padding:9px 16px;cursor:pointer;transition:filter .12s,transform .1s}
+  .btn:active{transform:translateY(1px)}
+  .btn.tech{background:var(--grn);color:#03100d}
+  .btn.tech:hover{filter:brightness(1.12)}
+  .btn.meme{background:var(--amb);color:#031410}
+  .btn.meme:hover{filter:brightness(1.08)}
+  .btn.ghost{background:transparent;color:var(--sub);border:1px solid var(--line2)}
+  .btn.ghost:hover{color:var(--ink);border-color:var(--ink)}
+  #connectBtn.on{color:var(--grn);border-color:rgba(0,214,164,.5)}
+  .xbtn{width:34px;height:34px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:none;border:none;color:var(--sub)}
+  .xbtn:hover{color:var(--ink)}
+  @media(max-width:700px){.hnav .hide-sm{display:none}}
+  /* ── hero: the void ── */
+  .hero{min-height:92vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;padding:120px 0 40px}
+  .wordmark{display:flex;align-items:center;justify-content:center;gap:6px;font-family:'Press Start 2P',monospace;font-size:clamp(26px,5.4vw,52px);color:var(--ink);letter-spacing:2px}
+  .wordmark svg{width:1.16em;height:1.16em;margin:0 2px;image-rendering:pixelated;filter:drop-shadow(0 0 18px rgba(0,214,164,.45));animation:bob 6s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  .tagline{margin-top:26px;font:500 15px 'JetBrains Mono',monospace;color:var(--sub);letter-spacing:.02em}
+  .tagline b{color:var(--grn);font-weight:700}
+  /* the one action */
+  .claim{margin:34px auto 0;display:flex;gap:9px;width:min(520px,92vw)}
+  .claim .cin{flex:1;display:flex;align-items:center;background:rgba(10,14,10,.8);border:1px solid var(--line2);border-radius:12px;padding:0 16px}
+  .claim .cin:focus-within{border-color:var(--grn)}
+  .claim .cin .dol{color:var(--mut);font-weight:700}
+  .claim input{flex:1;border:none;outline:none;background:none;padding:15px 8px;font:500 15px 'JetBrains Mono',monospace;color:var(--ink);text-transform:uppercase}
+  .claim input::placeholder{color:var(--mut);text-transform:none}
+  .claim button{border:1px solid var(--line2);background:var(--grn);color:#03100d;border-radius:12px;padding:0 20px;font:700 15px 'JetBrains Mono',monospace;cursor:pointer}
+  .claim button:hover{filter:brightness(1.12)}
+  .claimhint{margin-top:12px;font:500 12.5px 'JetBrains Mono',monospace;min-height:16px}
+  .claimhint.ok{color:var(--grn)}.claimhint.bad{color:var(--red)}
+  .herosub{margin-top:16px;max-width:480px;font:400 12.5px 'JetBrains Mono',monospace;color:var(--mut);line-height:1.8}
+  .herosub b{color:var(--sub)}
+  .cabar{display:none;align-items:center;gap:10px;margin:22px auto 0;width:fit-content;max-width:94vw;background:rgba(10,14,10,.8);border:1px solid rgba(0,214,164,.35);border-radius:999px;padding:7px 7px 7px 15px}
+  .cabar .ca-k{font:700 11px 'JetBrains Mono',monospace;color:var(--grn);white-space:nowrap;letter-spacing:.08em}
+  .cabar .ca-v{font:500 12.5px 'JetBrains Mono',monospace;color:var(--sub)}
+  .cabar .ca-copy{font:700 11px 'JetBrains Mono',monospace;color:#03100d;background:var(--grn);border:none;border-radius:999px;padding:6px 12px;cursor:pointer}
+  .scrollcue{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);font:700 10px 'JetBrains Mono',monospace;letter-spacing:.3em;color:var(--mut);text-align:center}
+  .scrollcue .ar{display:block;margin-top:8px;animation:dip 1.6s ease-in-out infinite}
+  @keyframes dip{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+  /* stats — quiet strip */
+  .stats{display:flex;gap:0;justify-content:center;margin:0 auto;border:1px solid var(--line);border-radius:14px;overflow:hidden;width:fit-content}
+  .stat{padding:16px 30px;text-align:center;color:var(--mut);font:500 10px 'JetBrains Mono',monospace;letter-spacing:.14em;border-left:1px solid var(--line)}
+  .stat:first-child{border-left:none}
+  .stat b{display:block;font:400 26px 'JetBrains Mono',monospace;color:var(--ink);margin-bottom:5px}
+  .stat.v b{color:var(--grn)}
+  .stat.m b{color:var(--amb)}
+  /* ── sections: minimal, spacious ── */
+  section{padding:70px 0 0}
+  .seclabel{text-align:center;font-family:'Press Start 2P',monospace;font-size:9px;color:var(--grn);letter-spacing:.2em;margin-bottom:14px}
+  .shead{text-align:center;max-width:640px;margin:0 auto 34px}
+  .shead h2{font:700 24px 'Inter',sans-serif;letter-spacing:-.4px;color:var(--ink)}
+  .shead p{color:var(--sub);font:400 13.5px 'JetBrains Mono',monospace;line-height:1.8;margin-top:12px}.shead b{color:var(--grn)}
+  /* gates */
+  .selhead{display:none}
+  .gates{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:44px 0 0}
+  @media(max-width:760px){.gates{grid-template-columns:1fr}}
+  .gate{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:28px;position:relative;overflow:hidden;transition:border-color .15s}
+  .gate.t:hover{border-color:rgba(0,214,164,.45)}.gate.m:hover{border-color:rgba(123,251,224,.45)}
+  .gate::before{content:"";position:absolute;top:0;left:0;right:0;height:2px}
+  .gate.t::before{background:var(--tech)}.gate.m::before{background:var(--meme)}
+  .gate .gk{font-family:'Press Start 2P',monospace;font-size:8px;letter-spacing:.12em}
+  .gate.t .gk{color:var(--grn)}.gate.m .gk{color:var(--amb)}
+  .gate h3{font:700 21px 'Inter',sans-serif;margin:12px 0 6px;color:var(--ink)}
+  .gate .gs{color:var(--mut);font:400 12.5px 'JetBrains Mono',monospace;margin-bottom:16px;line-height:1.7}
+  .gate ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+  .gate li{display:flex;gap:10px;align-items:flex-start;font:400 13px 'JetBrains Mono',monospace;color:var(--sub);line-height:1.65}
+  .gate li b{color:var(--ink);font-weight:700}
+  .gate li .ic{flex:none;width:18px;height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#03100d;margin-top:2px}
+  .gate.t li .ic{background:var(--grn)}.gate.m li .ic{background:var(--amb)}
+  .gate .gbtn{margin-top:20px;width:100%;padding:13px;font-size:13px;border-radius:12px}
+  /* why grid */
+  .why{margin-top:0}
+  .why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:880px){.why-grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:580px){.why-grid{grid-template-columns:1fr}}
+  .why-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;position:relative;overflow:hidden;transition:border-color .15s}
+  .why-card:hover{border-color:rgba(0,214,164,.4)}
+  .why-card.pk:hover{border-color:rgba(123,251,224,.4)}
+  .why-card .wi{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;background:rgba(0,214,164,.08);border:1px solid rgba(0,214,164,.2)}
+  .why-card.pk .wi{background:rgba(123,251,224,.07);border-color:rgba(123,251,224,.2)}
+  .why-card .first{position:absolute;top:14px;right:14px;font-family:'Press Start 2P',monospace;font-size:6px;color:#03100d;background:var(--grn);border-radius:999px;padding:5px 8px}
+  .why-card .first.pk{background:var(--amb);color:#031410}
+  .why-card h3{font:700 15px 'Inter',sans-serif;margin:13px 0 7px;color:var(--ink)}
+  .why-card p{color:var(--sub);font:400 12.5px 'JetBrains Mono',monospace;line-height:1.7}.why-card b{color:var(--grn)}.why-card.pk b{color:var(--amb)}
+  /* vault */
+  .stake{margin-top:0}
+  .stake-top{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+  .stake-top h2{font:700 22px 'Inter',sans-serif;color:var(--ink)}
+  .stake-top h2 .first{font-family:'Press Start 2P',monospace;font-size:6px;color:#03100d;background:var(--grn);border-radius:999px;padding:5px 9px;vertical-align:middle;margin-left:10px}
+  .stake-top p{color:var(--sub);font:400 13px 'JetBrains Mono',monospace;margin-top:9px;max-width:560px;line-height:1.7}
+  .stake-top .st-r{display:flex;gap:12px}
+  .stake-top .m{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 18px;text-align:right;color:var(--mut);font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:.1em}
+  .stake-top .m b{display:block;font:400 24px 'JetBrains Mono',monospace;color:var(--grn);margin-bottom:4px}
+  .pools{display:grid;grid-template-columns:repeat(auto-fill,minmax(305px,1fr));gap:14px}
+  .pool{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px;transition:border-color .15s}
+  .pool:hover{border-color:rgba(0,214,164,.35)}
+  .pool .ph{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .pool .pn{font:700 15px 'Inter',sans-serif;color:var(--ink)}
+  .pool .ptk{color:var(--grn);font:500 12px 'JetBrains Mono',monospace}
+  .pool .papr .v{font:400 24px 'JetBrains Mono',monospace;color:var(--grn)}
+  .pool .papr .l{font:500 8.5px 'JetBrains Mono',monospace;color:var(--mut);letter-spacing:.12em;text-align:right}
+  .pool .prow{display:flex;justify-content:space-between;font:400 12px 'JetBrains Mono',monospace;color:var(--mut);padding:8px 0;border-top:1px solid var(--line)}
+  .pool .prow b{color:var(--ink);font-weight:500}
+  .pool .pact{display:flex;gap:8px}
+  .pool .pact input{flex:1;min-width:0;background:var(--deep);border:1px solid var(--line2);border-radius:10px;padding:9px 11px;color:var(--ink);font:500 12.5px 'JetBrains Mono',monospace;outline:none}
+  .pool .pact input:focus{border-color:var(--grn)}
+  .pool .pact button{font:700 12px 'JetBrains Mono',monospace;border:none;border-radius:10px;padding:0 15px;background:var(--grn);color:#03100d;cursor:pointer}
+  .pool .pact button.sec{background:var(--card2);color:var(--sub);border:1px solid var(--line2)}
+  .pool .pyou{font:400 11.5px 'JetBrains Mono',monospace;color:var(--grn);background:rgba(0,214,164,.06);border:1px solid rgba(0,214,164,.25);border-radius:10px;padding:9px 11px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .pool .pyou .claim{font:700 11px 'JetBrains Mono',monospace;color:#03100d;background:var(--grn);border:none;border-radius:8px;padding:5px 11px;cursor:pointer}
+  .pool-empty{grid-column:1/-1;text-align:center;color:var(--mut);padding:44px;border:1px dashed var(--line2);border-radius:16px;font:400 13px 'JetBrains Mono',monospace}
+  /* rewards */
+  .rewards{margin-top:70px;background:var(--card);border:1px solid rgba(0,214,164,.25);border-radius:18px;padding:28px}
+  .rw-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .rw-t{font:700 19px 'Inter',sans-serif;color:var(--ink)}
+  .rw-pill{font-family:'Press Start 2P',monospace;font-size:6px;color:#03100d;background:var(--grn);border-radius:999px;padding:5px 9px;margin-left:9px;vertical-align:middle}
+  .rw-s{color:var(--sub);font:400 12.5px 'JetBrains Mono',monospace;margin-top:7px}
+  .rw-total{text-align:right;color:var(--mut);font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:.12em}
+  .rw-total b{display:block;font:400 26px 'JetBrains Mono',monospace;color:var(--grn);margin-bottom:4px}
+  .rw-how{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:20px}
+  @media(max-width:720px){.rw-how{grid-template-columns:1fr}}
+  .rw-card{background:var(--deep);border:1px solid var(--line);border-radius:13px;padding:16px}
+  .rw-card .rw-n{color:var(--grn);font-size:15px}.rw-card b{display:block;font:700 13.5px 'Inter',sans-serif;margin:7px 0;color:var(--ink)}
+  .rw-card p{color:var(--mut);font:400 12px 'JetBrains Mono',monospace;line-height:1.65}
+  /* faq/tiers */
+  .faq{margin-top:0}
+  .faq-h{font:700 22px 'Inter',sans-serif;margin-bottom:20px;text-align:center;color:var(--ink)}
+  .faq-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}
+  @media(max-width:720px){.faq-grid{grid-template-columns:1fr}}
+  .faq-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+  .faq-q .qn{font-family:'Press Start 2P',monospace;color:var(--grn);font-size:8px}
+  .faq-q h3{font:700 14.5px 'Inter',sans-serif;margin:8px 0 7px;color:var(--ink)}
+  .faq-q p{color:var(--sub);font:400 12.5px 'JetBrains Mono',monospace;line-height:1.7}.faq-q b{color:var(--grn)}
+  .tiers{margin-top:15px;border:1px solid rgba(0,214,164,.25);border-radius:14px;overflow:hidden;background:var(--card)}
+  .tier-h{font-family:'Press Start 2P',monospace;font-size:7px;color:var(--grn);letter-spacing:.1em;padding:14px 17px;border-bottom:1px solid var(--line);background:rgba(0,214,164,.04)}
+  .tier-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 17px;border-top:1px solid var(--line)}
+  .tier-row:first-of-type{border-top:none}
+  .tier-row.best{background:rgba(0,214,164,.05)}
+  .tl{font:400 12.5px 'JetBrains Mono',monospace;display:flex;align-items:center;gap:9px;flex-wrap:wrap;color:var(--sub)}
+  .tl .ti{font-size:14px}.tl .tsub{color:var(--mut);font-size:11px}
+  .tm{font:500 15px 'JetBrains Mono',monospace;color:var(--grn);flex:none}
+  .faq-note{color:var(--mut);font:400 11.5px 'JetBrains Mono',monospace;line-height:1.7;margin-top:12px;text-align:center}
+  /* board */
+  .board-h{display:flex;align-items:center;justify-content:space-between;margin:70px 0 16px}
+  .board-h h2{font:700 22px 'Inter',sans-serif;color:var(--ink)}
+  .board-h .c{color:var(--mut);font:400 12px 'JetBrains Mono',monospace}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px;padding-bottom:90px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:17px;display:flex;flex-direction:column;gap:11px;transition:border-color .15s}
+  .card:hover{border-color:rgba(0,214,164,.4)}
+  .card.meme:hover{border-color:rgba(123,251,224,.4)}
+  .ctop{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .cid{display:flex;gap:11px;align-items:center;min-width:0}
+  .cpfp{flex:none;width:44px;height:44px;border-radius:11px;object-fit:cover;border:1px solid var(--line2)}
+  .cname{font:700 15.5px 'Inter',sans-serif;line-height:1.15;color:var(--ink)}
+  .ctk{color:var(--grn);font:500 12px 'JetBrains Mono',monospace}.card.meme .ctk{color:var(--amb)}
+  .badge{flex:none;text-align:center;border-radius:11px;padding:6px 11px;border:1px solid var(--line);min-width:60px;background:var(--card2)}
+  .badge .s{font:500 19px 'JetBrains Mono',monospace;line-height:1}
+  .badge .l{font:500 7.5px 'JetBrains Mono',monospace;color:var(--mut);letter-spacing:.12em;margin-top:3px}
+  .badge.meme{background:var(--amb);border:none}
+  .badge.meme .s,.badge.meme .l{color:#031410}
+  .cdesc{color:var(--sub);font:400 12.5px 'JetBrains Mono',monospace;line-height:1.6;min-height:20px}
+  .chips{display:flex;gap:6px;flex-wrap:wrap}
+  .chip{font:500 10.5px 'JetBrains Mono',monospace;color:var(--mut);background:var(--deep);border:1px solid var(--line);border-radius:7px;padding:3px 8px}
+  .chip.ok{color:var(--grn);border-color:rgba(0,214,164,.35)}
+  .chip.dox{color:#6fb0ff;border-color:rgba(111,176,255,.3)}
+  .chip.lock{color:var(--amb);border-color:rgba(123,251,224,.3)}
+  .chip.audit{color:var(--grn);border-color:rgba(0,214,164,.3)}
+  .chip.multi{color:#5ce0d8;border-color:rgba(92,224,216,.3)}
+  .chip.mult{color:var(--grn);border-color:rgba(0,214,164,.45);font-weight:700}
+  .chip.meme{color:var(--amb);border-color:rgba(123,251,224,.4);font-weight:700}
+  .clinks{display:flex;gap:8px;margin-top:2px;border-top:1px solid var(--line);padding-top:11px}
+  .clink{flex:1;text-align:center;font:500 11px 'JetBrains Mono',monospace;color:var(--sub);background:var(--deep);border:1px solid var(--line);border-radius:9px;padding:8px}
+  .clink:hover{border-color:var(--grn);color:var(--grn)}
+  .vote{font:500 11px 'JetBrains Mono',monospace;color:var(--mut);background:var(--deep);border:1px solid var(--line);border-radius:9px;padding:8px 11px;cursor:pointer}
+  .vote:hover{border-color:var(--amb);color:var(--amb)}
+  .empty{grid-column:1/-1;text-align:center;color:var(--mut);padding:54px;border:1px dashed var(--line2);border-radius:16px;font:400 13px 'JetBrains Mono',monospace}
+  /* ── modal ── */
+  .ov{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;z-index:50}
+  .ov.show{display:flex}
+  .modal{width:540px;max-width:100%;background:var(--card);border:1px solid var(--line2);border-radius:20px;padding:26px}
+  .modal.wide{width:790px}
+  .modal h2{font:700 20px 'Inter',sans-serif;color:var(--ink)}
+  .modal .sub{color:var(--mut);font:400 12px 'JetBrains Mono',monospace;margin-top:7px;line-height:1.7}.modal .sub b{color:var(--sub)}
+  label{display:block;font:700 10px 'JetBrains Mono',monospace;color:var(--mut);margin:15px 0 6px;letter-spacing:.08em}
+  input,textarea{width:100%;background:var(--deep);border:1px solid var(--line2);border-radius:11px;padding:11px 13px;color:var(--ink);font:500 13px 'JetBrains Mono',monospace;outline:none}
+  input:focus,textarea:focus{border-color:var(--grn)}
+  input::placeholder,textarea::placeholder{color:#3a544c}
+  textarea{resize:vertical;min-height:58px}
+  .two{display:flex;gap:10px}.two>div{flex:1}
+  .req{color:var(--red)}
+  .tkhint{font:500 11.5px 'JetBrains Mono',monospace;margin-top:5px;min-height:14px}
+  .tkhint.ok{color:var(--grn)}.tkhint.bad{color:var(--red)}
+  /* kind switch */
+  .kinds{display:flex;gap:9px;margin:18px 0 4px}
+  .kind{flex:1;display:flex;flex-direction:column;gap:3px;align-items:center;font:700 13px 'JetBrains Mono',monospace;padding:13px;border-radius:13px;border:1px solid var(--line2);background:var(--deep);color:var(--mut);cursor:pointer;transition:.12s}
+  .kind small{font-weight:500;font-size:10.5px;letter-spacing:.04em}
+  .kind.t.sel{border-color:var(--grn);color:var(--grn);background:rgba(0,214,164,.06)}
+  .kind.m.sel{border-color:var(--amb);color:var(--amb);background:rgba(123,251,224,.05)}
+  .modes{display:flex;gap:8px;margin:14px 0 2px}
+  .mode{flex:1;font:700 12px 'JetBrains Mono',monospace;padding:10px;border-radius:10px;border:1px solid var(--line2);background:var(--deep);color:var(--mut);cursor:pointer}
+  .mode.sel{border-color:var(--grn);color:var(--grn);background:rgba(0,214,164,.06)}
+  /* pfp uploader */
+  .pfpbox{display:flex;gap:14px;align-items:center;margin-top:6px}
+  .pfpdrop{flex:1;border:1px dashed rgba(123,251,224,.45);background:rgba(123,251,224,.03);border-radius:13px;padding:18px;text-align:center;color:var(--mut);font:400 11.5px 'JetBrains Mono',monospace;cursor:pointer;line-height:1.6}
+  .pfpdrop:hover{border-color:var(--amb);color:var(--amb)}
+  .pfpdrop b{color:var(--amb)}
+  .pfpprev{display:none;flex:none;width:84px;height:84px;border-radius:16px;object-fit:cover;border:1px solid var(--amb)}
+  .pfphint{font:400 11px 'JetBrains Mono',monospace;color:var(--mut);margin-top:7px;line-height:1.6}
+  .pfphint b{color:var(--amb)}
+  .checks{margin-top:16px;border:1px solid var(--line2);border-radius:12px;overflow:hidden}
+  .chk{display:flex;align-items:center;gap:10px;padding:10px 13px;font:400 12px 'JetBrains Mono',monospace;border-top:1px solid var(--line);background:var(--card2);color:var(--sub)}
+  .chk:first-child{border-top:none}
+  .chk .ic{width:19px;height:19px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex:none;font-weight:700}
+  .chk .ic.y{background:rgba(0,214,164,.14);color:var(--grn)}
+  .chk .ic.n{background:rgba(255,85,102,.13);color:var(--red)}
+  .chk .pts{margin-left:auto;color:var(--mut);font-size:11px}
+  .result{margin-top:14px;padding:13px;border-radius:12px;font:400 12.5px 'JetBrains Mono',monospace;display:none;line-height:1.65;border:1px solid}
+  .result.show{display:block}
+  .result.pass{background:rgba(0,214,164,.07);border-color:rgba(0,214,164,.35);color:var(--grn)}
+  .result.fail{background:rgba(255,85,102,.07);border-color:rgba(255,85,102,.35);color:var(--red)}
+  .mfoot{display:flex;gap:10px;margin-top:18px}
+  .mfoot .btn{border-radius:12px;padding:12px;font-size:13px}
+  .close{position:absolute;top:18px;right:22px;color:var(--mut);cursor:pointer;font-size:24px}
+  .close:hover{color:var(--red)}
+  .kit{margin-top:14px;border:1px solid var(--line2);border-radius:12px;padding:15px;background:var(--deep)}
+  .kit .kn{font:700 16px 'Inter',sans-serif;color:var(--ink)}.kit .kt{color:var(--grn);font:500 12px 'JetBrains Mono',monospace}
+  .kit .kp{color:var(--sub);font:400 12px 'JetBrains Mono',monospace;line-height:1.65;margin-top:8px}
+  .kit .ktag{display:inline-block;font:500 11px 'JetBrains Mono',monospace;color:var(--grn);background:rgba(0,214,164,.06);border:1px solid rgba(0,214,164,.3);border-radius:7px;padding:3px 9px;margin:6px 6px 0 0}
+  .kit .klinks{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+  .kit .klink{font:500 11px 'JetBrains Mono',monospace;color:var(--sub);background:var(--card2);border:1px solid var(--line2);border-radius:9px;padding:6px 11px}
+  .kit .klink:hover{border-color:var(--grn);color:var(--grn)}
+  .boosts{margin-top:14px;border:1px solid var(--line2);border-radius:12px;padding:14px;background:var(--deep)}
+  .boost-h{font:700 9px 'JetBrains Mono',monospace;color:var(--grn);letter-spacing:.08em;margin-bottom:10px}
+  .boost{display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin:0 0 7px}
+  .boost input{display:none;width:auto}
+  .boost .bx{flex:none;width:19px;height:19px;border:1px solid var(--line2);border-radius:6px;margin-top:1px;position:relative;background:var(--card2)}
+  .boost input:checked+.bx{background:var(--grn);border-color:var(--grn)}
+  .boost input:checked+.bx::after{content:"✓";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#03100d;font-size:12px;font-weight:700}
+  .boost b{font:700 12.5px 'Inter',sans-serif;color:var(--ink)}.boost b em{font-style:normal;color:var(--grn);font:500 11px 'JetBrains Mono',monospace;margin-left:5px}
+  .boost .bd{color:var(--mut);font:400 11px 'JetBrains Mono',monospace;margin-top:2px}
+  .blink{margin:0 0 8px}
+  .boost-tot{border-top:1px solid var(--line);padding-top:9px;margin-top:6px;font:400 12px 'JetBrains Mono',monospace;color:var(--mut)}
+  .boost-tot b{color:var(--grn);font:500 15px 'JetBrains Mono',monospace}
+  /* why modal */
+  .wm-tag{display:inline-flex;align-items:center;gap:8px;font:700 10px 'JetBrains Mono',monospace;letter-spacing:.1em;color:var(--grn);background:rgba(0,214,164,.06);border:1px solid rgba(0,214,164,.3);border-radius:999px;padding:6px 13px;margin-bottom:12px}
+  .wm-tag .dot{width:6px;height:6px;border-radius:50%;background:var(--grn);box-shadow:0 0 8px var(--grn)}
+  .cmp{margin-top:18px;border:1px solid var(--line2);border-radius:13px;overflow:hidden}
+  .cmp-row{display:grid;grid-template-columns:0.9fr 1fr 1.25fr;align-items:center;border-top:1px solid var(--line);font:400 12px 'JetBrains Mono',monospace;background:var(--card2)}
+  .cmp-row:first-child{border-top:none}
+  .cmp-row>div{padding:11px 13px}
+  .cmp-row .ck{color:var(--mut);font-size:11px}
+  .cmp-row .pf{color:#5b6b60;border-left:1px solid var(--line);border-right:1px solid var(--line)}
+  .cmp-row .gt{color:var(--sub)}.cmp-row .gt b{color:var(--grn)}
+  .cmp-head{background:var(--deep);font-weight:700;font-size:11.5px}
+  .cmp-head .pf{color:var(--red)}.cmp-head .gt{color:var(--grn)}
+  .cmp-row .gt::before{content:"✓ ";color:var(--grn);font-weight:700}
+  .cmp-head .gt::before,.cmp-row .ck::before{content:none}
+  .cmp-row .pf::before{content:"✕ ";color:var(--red)}
+  .cmp-head .pf::before{content:none}
+  .wm-h{font:700 15px 'Inter',sans-serif;margin:22px 0 12px;color:var(--ink)}
+  .wm-list{display:flex;flex-direction:column;gap:12px}
+  .wm-i{display:flex;gap:12px;align-items:flex-start}
+  .wm-i .wm-n{flex:none;width:31px;height:31px;border-radius:10px;background:rgba(0,214,164,.07);border:1px solid rgba(0,214,164,.3);display:flex;align-items:center;justify-content:center;font-size:14px}
+  .wm-i b{font:700 13px 'Inter',sans-serif;color:var(--ink)}.wm-i p{color:var(--mut);font:400 11.5px 'JetBrains Mono',monospace;line-height:1.7;margin-top:3px}.wm-i em{color:var(--sub);font-style:normal}
+  .wm-note{margin-top:16px;padding:12px 14px;border:1px solid rgba(0,214,164,.25);background:rgba(0,214,164,.04);border-radius:12px;color:var(--mut);font:400 11px 'JetBrains Mono',monospace;line-height:1.7;text-align:center}.wm-note b{color:var(--grn)}
+  @media(max-width:620px){.cmp-row{grid-template-columns:1fr}.cmp-row .pf,.cmp-row .gt{border-left:none;border-right:none;border-top:1px dashed var(--line)}.cmp-head{display:none}}
+  footer{border-top:1px solid var(--line);padding:30px 0 46px;color:var(--mut);font:400 11.5px 'JetBrains Mono',monospace;text-align:center;line-height:1.9}
+  footer b{color:var(--grn)}
+  footer .fm{font-family:'Press Start 2P',monospace;font-size:9px;color:var(--ink);margin-bottom:9px}
+  .disclaimer{max-width:740px;margin:8px auto 0;font-size:10.5px;color:#3a544c;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="dither d1"></div><div class="dither d2"></div><div class="dither d3"></div>
+<!-- live launches marquee (docked bottom) -->
+<div class="mq" id="mq"><div class="mq-in" id="mqIn"></div></div>
+
+<header><div class="hrow">
+  <div class="logo">
+    <svg viewBox="0 0 24 24" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><g fill="#00d6a4"><rect x="1" y="6" width="22" height="2"/><rect x="1" y="16" width="22" height="2"/><rect x="1" y="8" width="2" height="8"/><rect x="21" y="8" width="2" height="8"/><rect x="10" y="9" width="4" height="2"/><rect x="9" y="11" width="3" height="2"/><rect x="12" y="11" width="3" height="2"/><rect x="10" y="13" width="4" height="2"/><rect x="4" y="11" width="2" height="2"/><rect x="18" y="11" width="2" height="2"/></g></svg>
+    PRINTER<b>PAD</b>
+  </div>
+  <div class="hnav">
+    <a class="hlink hide-sm" href="/browse">Browse</a>
+    <button class="hlink hide-sm" id="openWhy">Why</button>
+    <a class="hlink hide-sm" href="#stake">Vault</a>
+    <a class="hlink hide-sm" href="#faq">Earn</a>
+    <a class="xbtn" href="https://x.com/PrinterPadSTBL" target="_blank" rel="noopener" aria-label="Printer Pad on X"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+    <button class="btn ghost" id="connectBtn">Connect Wallet</button>
+    <button class="btn tech hide-sm" id="openSpawn">+ Launch</button>
+  </div>
+</div></header>
+
+<!-- HERO — the void -->
+<section class="hero">
+  <div class="wordmark">PRINTER<svg viewBox="0 0 24 24" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><g fill="#00d6a4"><rect x="1" y="6" width="22" height="2"/><rect x="1" y="16" width="22" height="2"/><rect x="1" y="8" width="2" height="8"/><rect x="21" y="8" width="2" height="8"/><rect x="10" y="9" width="4" height="2"/><rect x="9" y="11" width="3" height="2"/><rect x="12" y="11" width="3" height="2"/><rect x="10" y="13" width="4" height="2"/><rect x="4" y="11" width="2" height="2"/><rect x="18" y="11" width="2" height="2"/></g></svg>PAD</div>
+  <div class="tagline">Launch <b>tech</b>. Launch <b>memes</b>. Get paid either way.</div>
+  <form class="claim" id="claimForm">
+    <div class="cin"><span class="dol">$</span><input id="claimTicker" maxlength="12" placeholder="claim your ticker…" autocomplete="off"></div>
+    <button type="submit">Launch ▶</button>
+  </form>
+  <div class="claimhint" id="claimHint"></div>
+  <div class="herosub">A launchpad on <b>Stable (STBL chain)</b> where verified tech earns the highest creator
+    rewards, memes need an original PFP, and <b>duplicates are banned</b>. Every coin gets an
+    LP staking pool + cashback. <b>$PRINT</b> powers the pad.</div>
+  <a class="cabar" id="cabar" href="#" target="_blank" rel="noopener" title="View $PRINT">
+    <span class="ca-k">$PRINT CA</span><span class="ca-v" id="caV"></span><button class="ca-copy" id="caCopy" type="button">Copy</button>
+  </a>
+  <div class="scrollcue">SCROLL<span class="ar">↓</span></div>
+</section>
+
+<div class="wrap">
+  <div class="stats">
+    <div class="stat"><b id="stCount">0</b>COINS LAUNCHED</div>
+    <div class="stat v"><b id="stApr">42%</b>STAKING APR</div>
+    <div class="stat m"><b id="stCashback">10%</b>CASHBACK</div>
+    <div class="stat"><b>0</b>DUPES ALLOWED</div>
+  </div>
+
+  <div class="selhead"></div>
+  <section class="gates" id="launch">
+    <div class="gate t">
+      <div class="gk">PATH 01 — TECH</div>
+      <h3>Launch Tech</h3>
+      <div class="gs">For builders shipping a real product. The hard gate keeps it honest — and it pays.</div>
+      <ul>
+        <li><span class="ic">✓</span><span><b>Live website</b> — we ping it at launch; it must return 200.</span></li>
+        <li><span class="ic">✓</span><span><b>Public GitHub repo</b> — verified via the GitHub API, scored 0–100.</span></li>
+        <li><span class="ic">✓</span><span><b>Unique ticker</b> — duplicates banned across the whole pad.</span></li>
+        <li><span class="ic">$</span><span><b>Earns ETH</b> — highest creator rewards on Stable, ×Tech Score, up to 3.5× with trust boosts.</span></li>
+      </ul>
+      <button class="btn tech gbtn" data-open="tech">Launch Tech</button>
+    </div>
+    <div class="gate m">
+      <div class="gk">PATH 02 — MEME</div>
+      <h3>Launch Meme</h3>
+      <div class="gs">No product needed — memes are welcome. Two rules keep the casino clean.</div>
+      <ul>
+        <li><span class="ic">✓</span><span><b>Original PFP</b> — every image is fingerprinted; reusing any live coin's PFP is <b>banned</b>.</span></li>
+        <li><span class="ic">✓</span><span><b>Unique ticker</b> — one symbol, one coin, no copycat traps.</span></li>
+        <li><span class="ic">⚡</span><span><b>Instant listing</b> — no site, no repo, no waiting.</span></li>
+        <li><span class="ic">🌊</span><span><b>LP staking pool</b> — spins up with the coin, same as tech.</span></li>
+      </ul>
+      <button class="btn meme gbtn" data-open="meme">Launch Meme</button>
+    </div>
+  </section>
+
+  <section id="why" class="why">
+    <div class="seclabel">▚ WHY PRINTER PAD ▞</div>
+    <div class="shead">
+      <h2>The launchpad that pays.</h2>
+      <p>Other launchpads pay you nothing and let anyone rug. Printer Pad pays builders in <b>ETH</b>, stakes your holders, gives cashback, and bans every copycat.</p>
+    </div>
+    <div class="why-grid">
+      <div class="why-card"><span class="first">FIRST ON ROBINHOOD</span><div class="wi">🌊</div><h3>LP staking pools</h3><p>Every coin — tech or meme — launches with its own <b>LP staking pool</b>. The first launchpad on Stable (STBL chain) to ship them.</p></div>
+      <div class="why-card"><div class="wi">💰</div><h3>Highest creator rewards</h3><p>The <b>highest creator rewards on Stable</b> — verified tech earns <b>ETH</b> at the gate, scaled by Tech Score, plus a still-alive drip.</p></div>
+      <div class="why-card pk"><div class="wi">🔁</div><h3>Cashback on everything</h3><p><b id="cbPill">10%</b> <b>cashback</b> on launches and staking, credited straight back to your wallet. No other launchpad gives anything back.</p></div>
+      <div class="why-card pk"><span class="first pk">MEMES WELCOME</span><div class="wi">🎭</div><h3>Original PFPs only</h3><p>Every meme's image is <b>fingerprinted at launch</b> — reusing a live coin's PFP is rejected on the spot. Your meme stays yours.</p></div>
+      <div class="why-card"><div class="wi">🚫</div><h3>Duplicate tickers banned</h3><p>One ticker, one coin, across the entire pad. No PvP launches, no impersonation, no confusing your bag with a copycat.</p></div>
+      <div class="why-card"><div class="wi">🤖</div><h3>Build it with AI</h3><p>No product yet? The AI co-builder turns a one-line idea into a hosted site and a real GitHub repo in minutes — instantly gate-ready.</p></div>
+    </div>
+  </section>
+
+  <section id="stake" class="stake">
+    <div class="seclabel">☾ THE VAULT ☽</div>
+    <div class="stake-top">
+      <div>
+        <h2>LP staking pools <span class="first">FIRST ON ROBINHOOD CHAIN</span></h2>
+        <p>Every launched coin gets a live staking pool. Stake, earn simulated APR, and claim — with <b style="color:var(--grn)">cashback</b> on every claim. Connect your Stable-chain wallet to stake.</p>
+      </div>
+      <div class="st-r">
+        <div class="m"><b id="stTvl">0</b>TVL STAKED</div>
+        <div class="m"><b id="stPools">0</b>LIVE POOLS</div>
+      </div>
+    </div>
+    <div class="pools" id="pools"><div class="pool-empty">No pools yet — launch the first coin and its staking pool goes live instantly.</div></div>
+  </section>
+
+  <section id="rewards" class="rewards" style="display:none">
+    <div class="rw-head"><div><div class="rw-t">Creator Rewards <span class="rw-pill">HIGHEST ON ROBINHOOD</span></div><div class="rw-s" id="rwSub">Ship real tech, get paid in USDT0 — plus cashback.</div></div><div class="rw-total"><b id="rwTotal">0</b>ETH TO BUILDERS</div></div>
+    <div class="rw-how">
+      <div class="rw-card"><span class="rw-n">◆</span><b>Launch reward</b><p id="rwLaunch">Earn USDT0 on every verified launch, scaled by your Tech Score.</p></div>
+      <div class="rw-card"><span class="rw-n">↻</span><b>Still-alive drip</b><p id="rwDrip">Keep your site up and your repo active — keep earning ETH.</p></div>
+      <div class="rw-card"><span class="rw-n">🔁</span><b>Cashback</b><p id="rwCash">Get cashback on every launch and every stake, paid back to your wallet.</p></div>
+    </div>
+  </section>
+
+  <section id="faq" class="faq" style="display:none">
+    <div class="seclabel" style="margin-top:70px">▚ HOW DO I EARN ▞</div>
+    <h2 class="faq-h">Four ways in.</h2>
+    <div class="faq-grid">
+      <div class="faq-q"><div class="qn">01</div><h3>Launch a verified tech coin</h3><p>Attach a <b>payout wallet</b> when you launch. The moment your live site + public repo pass the gate, you get an instant <b>ETH creator reward</b> — the higher your Tech Score, the bigger it is — plus cashback.</p></div>
+      <div class="faq-q"><div class="qn">02</div><h3>Stake into any pool</h3><p>Every coin — tech or meme — has an <b>LP staking pool</b>. Stake, earn APR, and claim; each claim pays <b>cashback</b> on top. First launchpad on Stable (STBL chain) to offer it.</p></div>
+      <div class="faq-q"><div class="qn">03</div><h3>Keep it alive, keep earning</h3><p>We re-check tech sites and repos on a schedule. Stay live with recent commits and you collect a <b>still-alive USDT0 drip</b> every pass. Abandon it and the drip stops — we pay builders, not ghosts.</p></div>
+      <div class="faq-q"><div class="qn">04</div><h3>Boost with trust tiers</h3><p>Prove you're accountable and your rewards <b>multiply</b>. Doxx the dev, lock your tokens, audit, multisig — each adds to your multiplier on <b>every</b> reward and drip.</p></div>
+    </div>
+    <div class="tiers">
+      <div class="tier-h">REWARD TIERS — YOUR MULTIPLIER</div>
+      <div class="tier-row"><div class="tl"><span class="ti">✅</span> Verified <span class="tsub">live site + public repo</span></div><div class="tm" id="tmBase">1.0×</div></div>
+      <div class="tier-row"><div class="tl"><span class="ti">🛡</span> Doxxed dev <span class="tsub">public, verifiable identity</span></div><div class="tm" id="tmDox">+0.5×</div></div>
+      <div class="tier-row"><div class="tl"><span class="ti">🔒</span> Locked dev tokens <span class="tsub">proof of lock</span></div><div class="tm" id="tmLock">+0.5×</div></div>
+      <div class="tier-row"><div class="tl"><span class="ti">🔍</span> Audited contract <span class="tsub">third-party security audit</span></div><div class="tm" id="tmAudit">+1.0×</div></div>
+      <div class="tier-row"><div class="tl"><span class="ti">🔐</span> Multisig treasury <span class="tsub">funds in a multisig</span></div><div class="tm" id="tmMulti">+0.5×</div></div>
+      <div class="tier-row best"><div class="tl"><span class="ti">💎</span> All four — full trust <span class="tsub">max accountability = max rewards</span></div><div class="tm" id="tmMax">3.5×</div></div>
+    </div>
+    <div class="faq-note">Trust boosts need a public proof link, shown on your coin's card so anyone can verify it. Fake a claim and the community sees it.</div>
+  </section>
+
+  <section id="board">
+    <div class="board-h"><h2>Launched coins</h2><div><span class="c" id="boardCount">loading…</span> <a href="/browse" style="font:700 12px 'JetBrains Mono',monospace;color:var(--grn);margin-left:10px">Browse all →</a></div></div>
+    <div class="grid" id="grid"></div>
+  </section>
+</div>
+
+<footer>
+  <div class="fm">PRINTER PAD ☾</div>
+  the launchpad on Stable (STBL chain) · tech + memes, zero duplicates · <b>$PRINT</b>
+  <div class="disclaimer">Rewards, cashback and LP staking are a simulation on an off-chain ledger — a demo of the mechanics, with no custody of funds and no yield promised or owed. Nothing here is financial advice. Verify every contract yourself.</div>
+</footer>
+
+<!-- hidden triggers kept for app.js bindings -->
+<button id="heroTech" style="display:none"></button>
+<button id="heroMeme" style="display:none"></button>
+
+<!-- launch modal -->
+<div class="ov" id="ov">
+  <div class="modal" style="position:relative">
+    <span class="close" id="close">×</span>
+    <h2 id="mTitle">Launch a coin</h2>
+    <div class="sub" id="mSub">Pick your path — verified tech that earns, or an instant meme with an original PFP.</div>
+    <div class="kinds">
+      <button class="kind t sel" id="kindTech">TECH<small>site + repo · earns ETH</small></button>
+      <button class="kind m" id="kindMeme">MEME<small>original PFP · instant</small></button>
+    </div>
+
+    <!-- TECH -->
+    <div id="techPanel">
+      <div class="modes" id="modes" style="display:none">
+        <button class="mode sel" data-mode="have">I have a project</button>
+        <button class="mode" data-mode="ai">✨ Build one with AI</button>
+      </div>
+      <div id="aiPanel" style="display:none">
+        <label>YOUR IDEA <span class="req">*</span></label>
+        <textarea id="f_idea" maxlength="400" placeholder="one line — what do you want to build? e.g. “an on-chain uptime monitor for Stable-chain dapps”"></textarea>
+        <button class="btn tech" id="aiBuild" style="width:100%;margin-top:12px;border-radius:12px;padding:12px">✨ Build it with AI</button>
+        <div id="aiOut"></div>
+      </div>
+      <div id="havePanel">
+        <div class="two">
+          <div><label>NAME <span class="req">*</span></label><input id="f_name" maxlength="40" placeholder="Acme Protocol"></div>
+          <div><label>TICKER <span class="req">*</span></label><input id="f_ticker" maxlength="12" placeholder="ACME"><div class="tkhint" id="tkHint"></div></div>
+        </div>
+        <label>WHAT IT DOES</label><textarea id="f_desc" maxlength="240" placeholder="One line on what you're building…"></textarea>
+        <label>WEBSITE URL <span class="req">*</span></label><input id="f_web" maxlength="200" placeholder="https://yourproject.xyz">
+        <label>GITHUB REPO <span class="req">*</span></label><input id="f_gh" maxlength="200" placeholder="https://github.com/you/your-repo">
+        <label>TOKEN CONTRACT (OPTIONAL)</label><input id="f_ca" maxlength="50" placeholder="0x… Stable-chain contract address">
+        <label>PAYOUT WALLET — <span style="color:var(--grn)">EARN USDT0 + CASHBACK</span> (OPTIONAL)</label><input id="f_payout" maxlength="50" placeholder="0x… Stable-chain address for rewards">
+        <div class="boosts" id="boosts">
+          <div class="boost-h">TRUST BOOSTS — STACK MULTIPLIERS ON YOUR USDT0 REWARDS</div>
+          <label class="boost"><input type="checkbox" id="f_dox"><span class="bx"></span><div><b>🛡 Doxxed dev <em id="bDoxMult">+0.5×</em></b><div class="bd">Public, verifiable identity. Paste proof below.</div></div></label>
+          <input id="f_doxLink" class="blink" maxlength="200" placeholder="proof link (X profile, LinkedIn, doxx post…)" style="display:none">
+          <label class="boost"><input type="checkbox" id="f_lock"><span class="bx"></span><div><b>🔒 Locked dev tokens <em id="bLockMult">+0.5×</em></b><div class="bd">Team/dev allocation locked. Paste proof below.</div></div></label>
+          <input id="f_lockLink" class="blink" maxlength="200" placeholder="proof link (token lock / vesting page…)" style="display:none">
+          <label class="boost"><input type="checkbox" id="f_audit"><span class="bx"></span><div><b>🔍 Audited contract <em id="bAuditMult">+1.0×</em></b><div class="bd">Smart contract audited by a security firm. Paste the report.</div></div></label>
+          <input id="f_auditLink" class="blink" maxlength="200" placeholder="proof link (audit report…)" style="display:none">
+          <label class="boost"><input type="checkbox" id="f_multi"><span class="bx"></span><div><b>🔐 Multisig treasury <em id="bMultiMult">+0.5×</em></b><div class="bd">Funds in a multisig, not one wallet. Paste proof.</div></div></label>
+          <input id="f_multiLink" class="blink" maxlength="200" placeholder="proof link (multisig address / page…)" style="display:none">
+          <div class="boost-tot">Your reward multiplier: <b id="multOut">1.0×</b></div>
+        </div>
+        <div class="sub" id="rewardHint" style="margin-top:6px;display:none"></div>
+      </div>
+    </div>
+
+    <!-- MEME -->
+    <div id="memePanel" style="display:none">
+      <div class="two">
+        <div><label>NAME <span class="req">*</span></label><input id="m_name" maxlength="40" placeholder="Robin the Hood"></div>
+        <div><label>TICKER <span class="req">*</span></label><input id="m_ticker" maxlength="12" placeholder="ROBIN"><div class="tkhint" id="mtkHint"></div></div>
+      </div>
+      <label>PFP — THE FACE OF YOUR MEME <span class="req">*</span></label>
+      <div class="pfpbox">
+        <div class="pfpdrop" id="pfpDrop"><b>Upload your PFP</b><br>PNG · JPG · WEBP · GIF, up to ~1MB<br>click or drop it here</div>
+        <img class="pfpprev" id="pfpPrev" alt="">
+      </div>
+      <input type="file" id="m_pfp" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none">
+      <div class="pfphint">Your image is <b>fingerprinted at launch</b> — if any live coin already uses it, the launch is rejected. One PFP, one coin.</div>
+      <label>ONE-LINER</label><textarea id="m_desc" maxlength="240" placeholder="What's the joke?"></textarea>
+      <label>TOKEN CONTRACT (OPTIONAL)</label><input id="m_ca" maxlength="50" placeholder="0x… Stable-chain contract address">
+      <label>WALLET (OPTIONAL — FOR STAKING CASHBACK)</label><input id="m_payout" maxlength="50" placeholder="0x… Stable-chain address">
+    </div>
+
+    <div class="checks" id="checks" style="display:none"></div>
+    <div class="result" id="result"></div>
+    <div class="mfoot">
+      <button class="btn ghost" id="verify" style="flex:1">Verify</button>
+      <button class="btn tech" id="spawn" style="flex:1.4">🛠 Launch Tech</button>
+    </div>
+  </div>
+</div>
+
+<!-- why printerpad modal -->
+<div class="ov" id="whyOv">
+  <div class="modal wide" style="position:relative">
+    <span class="close" id="whyClose">×</span>
+    <div class="wm-tag"><span class="dot"></span>THE LAUNCHPAD THAT PAYS</div>
+    <h2>Why Printer Pad?</h2>
+    <div class="sub">Most launchpads are casinos — no product, no rewards, endless rugs, the same ticker launched ten times and the same stolen PFP on five different rugs. Printer Pad has two clean paths: <b>verified tech</b> that earns the highest creator rewards on Stable, and <b>memes</b> with one rule — bring an original. Both get LP staking and cashback.</div>
+
+    <div class="cmp">
+      <div class="cmp-row cmp-head"><div>—</div><div class="pf">Every other launchpad</div><div class="gt">Printer Pad</div></div>
+      <div class="cmp-row"><div class="ck">Tech launches</div><div class="pf">A coin with zero product</div><div class="gt">Real product — <b>live site + public GitHub</b>, verified</div></div>
+      <div class="cmp-row"><div class="ck">Meme launches</div><div class="pf">Any stolen PFP, ten times over</div><div class="gt"><b>Original PFP only</b> — image fingerprinted, dupes rejected</div></div>
+      <div class="cmp-row"><div class="ck">Creator rewards</div><div class="pf">Basically nothing</div><div class="gt"><b>Highest on Stable</b> — USDT0 per launch (×Tech Score) + drip</div></div>
+      <div class="cmp-row"><div class="ck">LP staking</div><div class="pf">None</div><div class="gt"><b>A staking pool for every coin</b> — first on Stable (STBL chain)</div></div>
+      <div class="cmp-row"><div class="ck">Cashback</div><div class="pf">Never</div><div class="gt"><b>Cashback</b> on launches and staking, back to your wallet</div></div>
+      <div class="cmp-row"><div class="ck">Duplicate tickers</div><div class="pf">Ten $DOGEs, pick the rug</div><div class="gt"><b>Banned</b> — one ticker, one coin, no PvP</div></div>
+      <div class="cmp-row"><div class="ck">Discovery</div><div class="pf">Bots &amp; hype, race to dump</div><div class="gt">Ranked by <b>Tech Score</b> — merit, not noise</div></div>
+      <div class="cmp-row"><div class="ck">Build help</div><div class="pf">You're on your own</div><div class="gt"><b>AI co-builder</b>: idea → hosted site + real repo in minutes</div></div>
+    </div>
+
+    <div class="wm-h">Your incentives, in detail</div>
+    <div class="wm-list">
+      <div class="wm-i"><span class="wm-n">🌊</span><div><b>LP staking pools — first on Stable (STBL chain)</b><p>Every coin launches with its own staking pool, live the instant it lists. Holders stake, earn APR, and claim — with cashback on every claim.</p></div></div>
+      <div class="wm-i"><span class="wm-n">💰</span><div><b>Highest creator rewards on Stable</b><p>The instant your site + repo clear the gate, you earn ETH, scaled by your Tech Score. A 95/100 launch earns far more than a 50/100. Quality pays; spam doesn't.</p></div></div>
+      <div class="wm-i"><span class="wm-n">🎭</span><div><b>Memes with a spine</b><p>Memes launch instantly — no product needed. But the PFP is fingerprinted and the ticker is locked, so nobody can clone your coin or trap your buyers with a lookalike. <em>Original or nothing.</em></p></div></div>
+      <div class="wm-i"><span class="wm-n">🔁</span><div><b>Cashback on everything</b><p>Every launch and every stake pays cashback straight back to your wallet — a share of protocol activity returned to the people who create it.</p></div></div>
+      <div class="wm-i"><span class="wm-n">↻</span><div><b>Still-alive drip — get paid to maintain</b><p>We re-check tech sites and repos on a schedule. Keep it live with recent commits and you keep collecting ETH. Let it rot and the drip stops.</p></div></div>
+      <div class="wm-i"><span class="wm-n">⚡</span><div><b>Trust multipliers — accountability stacks</b><p>🛡 Doxxed (+0.5×), 🔒 Locked (+0.5×), 🔍 Audited (+1.0×), 🔐 Multisig (+0.5×) — each stacks onto <em>every</em> reward, up to <b>3.5×</b>, and doubles as a public trust signal on your card.</p></div></div>
+    </div>
+    <div class="wm-note">Rewards, cashback and staking are a <b>simulation</b> on an off-chain ledger — no custody, no yield promised. $PRINT powers the pad. <b>Verify every contract yourself.</b></div>
+    <button class="btn tech" id="whySpawn" style="width:100%;margin-top:16px;border-radius:12px;padding:13px">+ Launch a coin</button>
+  </div>
+</div>
+
+<script src="/client/src/app.js"></script>
+<script>
+// hero claim box → live availability check + opens the launch modal with the ticker prefilled
+(function () {
+  var inp = document.getElementById('claimTicker'), hint = document.getElementById('claimHint'), t;
+  inp.addEventListener('input', function () {
+    clearTimeout(t); var v = inp.value.replace(/^\$/, '').toUpperCase();
+    if (!v) { hint.textContent = ''; hint.className = 'claimhint'; return; }
+    t = setTimeout(async function () {
+      try { var d = await (await fetch('/api/ticker-check?t=' + encodeURIComponent(v))).json();
+        if (d.taken) { hint.textContent = '✕ $' + d.ticker + ' is taken — duplicates are banned.'; hint.className = 'claimhint bad'; }
+        else { hint.textContent = '✓ $' + d.ticker + ' is available. press launch.'; hint.className = 'claimhint ok'; }
+      } catch (e) {}
+    }, 300);
+  });
+  document.getElementById('claimForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var v = inp.value.replace(/^\$/, '').toUpperCase();
+    var ft = document.getElementById('f_ticker'), mt = document.getElementById('m_ticker');
+    if (v) { ft.value = v; mt.value = v; ft.dispatchEvent(new Event('input')); mt.dispatchEvent(new Event('input')); }
+    document.getElementById('openSpawn').click();
+  });
+})();
+</script>
+</body>
+</html>
