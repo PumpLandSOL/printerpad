@@ -52,6 +52,34 @@
   if (window.ethereum && window.ethereum.on) window.ethereum.on('accountsChanged', (a) => { wallet = (a && a[0] && isEvm(a[0])) ? a[0] : ''; if (wallet) localStorage.setItem('printerpad_w', wallet); else localStorage.removeItem('printerpad_w'); renderWallet(); loadPools(); });
   renderWallet();
 
+  // ---- real on-chain deploy (PrintToken on Stable, 1% transfer fee -> pad treasury) ----
+  function wireDeploy(prefix) {
+    const btn = $(prefix + '_deploy'); if (!btn) return;
+    btn.onclick = async () => {
+      if (!wallet) return toast('Connect a wallet first');
+      const eth = window.ethereum; if (!eth) return toast('No EVM wallet found');
+      const name = $(prefix === 'f' ? 'f_name' : 'm_name').value.trim();
+      const tick = $(prefix === 'f' ? 'f_ticker' : 'm_ticker').value.trim().toUpperCase().replace(/^\$/, '');
+      const sup = parseInt($(prefix + '_supply').value) || 1000000000;
+      const msg = $(prefix + '_deployMsg');
+      if (!name || !tick) { msg.textContent = 'Name and ticker first — the contract bakes them in forever.'; return; }
+      btn.disabled = true; btn.textContent = 'CONFIRM IN WALLET…';
+      try {
+        msg.textContent = 'Deploying ' + name + ' ($' + tick + ') · ' + sup.toLocaleString() + ' supply · 1% transfer fee to the pad…';
+        const r = await window.PP_DEPLOY.deploy(eth, wallet, name, tick, sup);
+        if (r.address) {
+          $(prefix + '_ca').value = r.address;
+          msg.innerHTML = '✓ Deployed at <b>' + esc(r.address) + '</b> — <a href="https://stablescan.xyz/address/' + esc(r.address) + '" target="_blank" rel="noopener" style="text-decoration:underline">Stablescan</a> · seed liquidity on DYORSwap, then launch below.';
+          toast('Token deployed on Stable');
+        } else {
+          msg.innerHTML = 'Tx sent — still confirming. Check <a href="https://stablescan.xyz/tx/' + esc(r.tx) + '" target="_blank" rel="noopener" style="text-decoration:underline">Stablescan</a> and paste the contract address above.';
+        }
+      } catch (e) { msg.textContent = 'Deploy failed or rejected: ' + ((e && e.message) || e); }
+      btn.disabled = false; btn.textContent = 'DEPLOY ON-CHAIN ►';
+    };
+  }
+  wireDeploy('f'); wireDeploy('m');
+
   // ---- live launches marquee ----
   function renderMarquee(projects) {
     const mq = $('mq'); if (!mq) return;

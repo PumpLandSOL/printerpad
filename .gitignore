@@ -6,3 +6,5 @@ projects.json
 _*.js
 _*.mjs
 _*.html
+contracts/out
+contracts/cache
